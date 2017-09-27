@@ -9,13 +9,18 @@ class Glider implements Comparable<Glider>{
   
   PVector _finish;
   
-  Glider(int dna_size, PVector start, PVector finish) {
-    dna = new DNA(dna_size, random(0.3));
+  String name;
+  
+  final String[] names = "abcdefghjklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+  
+  Glider(int dna_size, PVector start, PVector finish, int name_pointer) {
+    dna = new DNA(dna_size, random(0.02)+0.01);
     pos = start;
     dna_pointer = 0;
     dir = (new PVector(1,0)).normalize();
     alive = true;
     _finish = finish;
+    name = names[name_pointer%names.length];
   }
   
   void update() {
@@ -46,9 +51,11 @@ class Glider implements Comparable<Glider>{
     float sq = sqrt(width*width+height*height);
     //int val = (int)((((pos.dist(_finish)/sq)+((500-dna_pointer)/500.0))-((g.pos.dist(_finish)/sq)+((500-g.dna_pointer)/500.0))));
     int val = (int)(pos.dist(_finish)-g.pos.dist(_finish));
-    if (abs(val) <= 10) {
+    if (val == 0) {
       val = g.dna_pointer-dna_pointer; 
     }
+    if (val != 0) val/=abs(val);
+    //println(val);
     return val;
   }
 }

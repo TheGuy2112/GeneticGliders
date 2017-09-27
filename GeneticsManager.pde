@@ -18,7 +18,7 @@ class GeneticsManager {
   
   void update() {
     boolean all_dead = _gm.update(); 
-    if (update_counter++%dna_size==0 || all_dead) {
+    if (/*update_counter++%dna_size==0 || */all_dead) {
       _gm.generation_step();
       update_counter = 1;
       generations++;

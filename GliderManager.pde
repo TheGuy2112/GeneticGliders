@@ -11,16 +11,29 @@ class GliderManager {
   int kill_count;
   
   int glider_amount;
-    
+  
+  Tree<Glider> family_tree;
+  
+  //because wtf processing
+  int glider_name_pointer;
+  
   public GliderManager(int dna_size, int amount, Terrain t, PVector finish) {
+    glider_name_pointer = 0;
     glider_amount = amount;
      DNA_SIZE = dna_size;
-     _finish = finish;
+     _finish = finish;     
+     
+     family_tree = new Tree<Glider>();
+     family_tree.add_anchor("", null);
+     
      gliders = new ArrayList<Glider>();
+     
      for (int i=0;i<amount;i++) { //<>//
        Glider new_glider = create_random_glider();
        gliders.add(new_glider);
+       family_tree.add_child_to("", null, new_glider.name);
      }
+     
      this.t = t;
      this.t.read_from_file();
      kill_count = 0;
@@ -39,20 +52,37 @@ class GliderManager {
   }
   
   Glider create_random_glider() {
-    Glider new_glider = new Glider(DNA_SIZE, new PVector(5,height/2), _finish);
+    Glider new_glider = new Glider(DNA_SIZE, new PVector(5,height/2), _finish, glider_name_pointer);
     for (int i=0;i<DNA_SIZE;i++) {
       new_glider.dna._dna[i] = random(-PI/8,PI/8);
     }
+    glider_name_pointer++;
     return new_glider;
   }
   
   void sort_after_fitness() {
-    Collections.sort(gliders);
+    try {
+      Collections.sort(gliders);
+    } catch (Exception e) {
+      e.printStackTrace();
+      System.exit(-1);
+    }
   }
   
   void eliminate() {
     ArrayList<Glider> new_gliders = new ArrayList<Glider>();
-    for (int i=0;i<gliders.size()/2;i++) new_gliders.add(gliders.get(i)); 
+    for (int i=0;i<gliders.size()/2;i++) {
+      if (i==0) {
+        for (int j=0;j<gliders.size()/5-1;j++)
+          new_gliders.add(gliders.get(i));
+      } else if (i==1) {
+        for (int j=0;j<gliders.size()*16/100;j++)
+          new_gliders.add(gliders.get(i));
+      } else if (i==2) {
+        for (int j=0;j<gliders.size()*14/100;j++)
+          new_gliders.add(gliders.get(i));
+      } else new_gliders.add(gliders.get(i));
+    }
     gliders = new_gliders;
   }
   
@@ -67,9 +97,12 @@ class GliderManager {
     for (int i=0;i<glider_amount;i++) {
       Glider parent1 = parents.get((int)random(gliders.size()));
       Glider parent2 = parents.get((int)random(gliders.size()));
-      Glider child = new Glider(parent1.dna.length(), new PVector(5,height/2), _finish);
+      Glider child = new Glider(parent1.dna.length(), new PVector(5,height/2), _finish, glider_name_pointer);
       child.dna = parent1.dna.cross(parent2.dna);
       children.add(child);
+      glider_name_pointer++;
+      
+       family_tree.add_child_to(parent1.name, null, child.name);
     }
     gliders = children;
   }
@@ -79,6 +112,7 @@ class GliderManager {
     eliminate();
     populate();
     kill_count = 0;
+    //family_tree.print_tree();
   }
   
   void show() {
